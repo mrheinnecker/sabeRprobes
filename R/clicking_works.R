@@ -170,9 +170,21 @@ server <- function(input, output, session) {
       id=clicked_point$id,
       time = Sys.time()
     )
+    
+    ## check if clicked point was already clicked before... if so... remove it
+    
+    all_clicks <- all_clicks_df()
+    
+    if(clicked_point$id %in% all_clicks$id){
+      updated_df <- all_clicks %>%
+        filter(!id==clicked_point$id)
+    } else {
+      updated_df <- bind_rows(all_clicks, new_click)
+    }
+    
     # 
     # # Append the new click data to the dataframe
-    updated_df <- bind_rows(all_clicks_df(), new_click)
+    
     # 
     # # Update the reactive value with the new dataframe
     all_clicks_df(updated_df)
