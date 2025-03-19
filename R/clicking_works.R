@@ -67,12 +67,12 @@ server <- function(input, output, session) {
   
   output$secondPlot <- renderPlotly({
     
-    event <- event_data("plotly_click")
+    click_info <- event_data("plotly_click")
     
     #req(input$xvar, input$yvar)
     data <- datasetInput()
    
-    if (is.null(event)) {
+    if (is.null(click_info)) {
       
       p2 <- ggplot(data,
                    aes(x = tm, y = rh_mm1, color=1)) +
@@ -87,7 +87,9 @@ server <- function(input, output, session) {
       # click_info <- event
       # 
       clicked_point <- data %>%
-        filter(start==event$x&group==event$y)
+        filter(start==click_info$x&group==click_info$y)
+      
+      # 
       # 
       # new_click <- data.frame(
       #   x = click_info$x,
@@ -97,18 +99,25 @@ server <- function(input, output, session) {
       #   id=clicked_point$id,
       #   time = Sys.time()
       # )
-      # 
-      # # Append the new click data to the dataframe
+      # # 
+      # # # Append the new click data to the dataframe
       # updated_df <- bind_rows(all_clicks_df(), new_click)
-      # 
-      # # Update the reactive value with the new dataframe
+      # # 
+      # # # Update the reactive value with the new dataframe
       # all_clicks_df(updated_df)
+      
+      current_clicked_probes <- all_clicks_df()
       
       #clicked_point$id
       
       highlighted_data <- data %>% 
-        mutate(hl=case_when(id== clicked_point$id~ "1", 
+        mutate(hl=case_when(id %in% current_clicked_probes$id ~ "1", 
                             TRUE ~ "0"))
+      
+      
+      # highlighted_data <- data %>% 
+      #   mutate(hl=case_when(id== clicked_point$id~ "1", 
+      #                       TRUE ~ "0"))
       
       p2 <- ggplot(highlighted_data,
                    aes(x = tm, y = rh_mm1, color=hl, size=as.character(hl))) +
@@ -146,26 +155,34 @@ server <- function(input, output, session) {
    
     click_info <- event_data("plotly_click")
     
-    # new_click <- data.frame(
-    #   x = click_info$x,
-    #   y = click_info$y,
-    #   pointNumber = click_info$pointNumber,
-    #   curveNumber = click_info$curveNumber,
-    #   time = Sys.time()
-    # )
+    data <- datasetInput()
+    
+    
+    clicked_point <- data %>%
+      filter(start==click_info$x&group==click_info$y)
+
+
+    new_click <- data.frame(
+      x = click_info$x,
+      y = click_info$y,
+      pointNumber = click_info$pointNumber,
+      curveNumber = click_info$curveNumber,
+      id=clicked_point$id,
+      time = Sys.time()
+    )
     # 
     # # Append the new click data to the dataframe
-    # updated_df <- bind_rows(all_clicks_df(), new_click)
+    updated_df <- bind_rows(all_clicks_df(), new_click)
     # 
     # # Update the reactive value with the new dataframe
-    # all_clicks_df(updated_df)
+    all_clicks_df(updated_df)
     
     
     
     
     
     # Print event data in R console
-    print(click_info)
+    print(all_clicks_df())
     
    
   })
