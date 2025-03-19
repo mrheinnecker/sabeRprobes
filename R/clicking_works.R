@@ -81,7 +81,7 @@ server <- function(input, output, session) {
               yend=group,
               color=pcol,
               
-          ))+
+          ), linewidth=5)+
         scale_color_gradientn(colors = c("blue", "yellow"))+
         
         #geom_point() +
@@ -96,8 +96,8 @@ server <- function(input, output, session) {
         #clicked_point$id
 
         highlighted_data <- data %>%
-          mutate(hl=case_when(id %in% current_clicked_probes$id ~ "1",
-                              TRUE ~ "0"))
+          mutate(hl=case_when(id %in% current_clicked_probes$id ~ id,
+                              TRUE ~ NA))
       
       
       p <- ggplot(highlighted_data)+#, aes(x = input$xvar, y = input$yvar)) +
@@ -109,7 +109,7 @@ server <- function(input, output, session) {
               yend=group,
               color=hl,
               
-          ))+
+          ), linewidth=5)+
       #  scale_color_gradientn(colors = c("blue", "yellow"))+
         
         #geom_point() +
@@ -182,16 +182,18 @@ server <- function(input, output, session) {
       
       #clicked_point$id
       
-      highlighted_data <- data %>% 
-        mutate(hl=case_when(id %in% current_clicked_probes$id ~ "1", 
+      highlighted_data <- data %>%
+        mutate(hl=case_when(id %in% current_clicked_probes$id ~ id,
+                            TRUE ~ NA),
+               sz=case_when(id %in% current_clicked_probes$id ~ "1",
                             TRUE ~ "0"))
       
       
       
       p2 <- ggplot(highlighted_data,
-                   aes(x = tm, y = rh_mm1, color=hl, size=as.character(hl))) +
-        geom_point()+
-        scale_color_manual(breaks=c(0,1), values = c("black", "red"))+
+                   aes(x = tm, y = rh_mm1, color=hl, size=sz)) +
+        geom_point(shape=1)+
+        #scale_color_manual(breaks=c(0,1), values = c("black", "red"))+
         scale_size_manual(breaks=c(0,1), values = c(1,3))+
         theme_minimal()
     
