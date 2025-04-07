@@ -84,3 +84,36 @@ mine_probes_from_sequence <- function(char_seq, probe_length, len, len_range){
 }
 
 
+group_sequences <- function(df, max_gap = 5) {
+  # Sort by start position
+  df <- df[order(df$start), ]
+  
+  # Initialize group assignment and tracking of last end positions
+  df$group <- NA
+  group_end <- numeric(0)  # Stores the latest `end` per group
+  
+  for (i in seq_len(nrow(df))) {
+    assigned <- FALSE
+    
+    # Try to assign the sequence to an existing group
+    for (g in seq_along(group_end)) {
+      if (df$start[i] > group_end[g] + max_gap) {
+        df$group[i] <- g
+        group_end[g] <- df$end[i]  # Update group's latest end position
+        assigned <- TRUE
+        break
+      }
+    }
+    
+    # If no existing group is available, create a new group
+    if (!assigned) {
+      df$group[i] <- length(group_end) + 1
+      group_end <- c(group_end, df$end[i])
+    }
+  }
+  
+  return(df)
+}
+
+
+
